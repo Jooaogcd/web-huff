@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Huffman Coding Compressor</title>
+
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/styles.css">
+
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🗜️Huffman Coding Compressor</h1>
+            <p>Compressing and decompressing files using the Huffman Coding algorithm.</p>
+        </div>
+
+        <div class="mode-selector">
+            <button class="mode-btn active" id="compressBtn" onclick="setMode('compress')">
+                📦 Compress
+            </button>
+            <button class="mode-btn" id="decompressBtn" onclick="setMode('decompress')">
+                📂 Decompress
+            </button>
+        </div>
+
+        <div class="upload-section">
+            <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                <svg class="upload-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                </svg>
+                <div class="upload-text" id="uploadText">Click to upload file</div>
+                <div class="upload-hint" id="uploadHint">It only supports text files for now (.txt, .json, .xml, .csv)</div>
+            </div>
+            <input type="file" id="fileInput" accept=".txt,.json,.xml,.csv" onchange="handleFileSelect(event)">
+            <button class="process-btn" id="processBtn" onclick="processFile()">Compress File</button>
+        </div>
+
+        <div class="loader" id="loader">
+            <div class="spinner"></div>
+            <p style="margin-top: 15px; color: #666;">Processing...</p>
+        </div>
+
+        <div class="stats-section" id="statsSection">
+            <div class="stats-box">
+                <div class="stats-title">📊 Stats</div>
+                <div class="stats-grid" id="statsGrid"></div>
+            </div>
+
+            <div class="codes-table" id="codesTable">
+                <h3>🔢 Huffman Codes</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Chars</th>
+                                <th>Binary</th>
+                                <th>Lenght</th>
+                            </tr>
+                        </thead>
+                        <tbody id="codesTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <button class="download-btn" id="downloadBtn" onclick="downloadResult()">
+                ⬇️ Download Compressed File
+            </button>
+        </div>
+    </div>"
+
+    <script src="js/huffman.js"></script>
+    <script src="js/interface.js"></script>
+</body>
+</html>
