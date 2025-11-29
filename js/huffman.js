@@ -1,32 +1,33 @@
-// Huffman tree struct
+
 class HuffmanNode {
-    constructor(char, freq) {
-        this.char = char;
+    constructor(byte, freq) {
+        this.byte = byte;  // store the byte value (0-255)
         this.freq = freq;
         this.left = null;
-        this.right = null; 
+        this.right = null;
     }
 }
 
-function buildHuffmanTree(text) {
-    if (!text) return null;
+function buildHuffmanTree(bytes) {
+    if (!bytes || bytes.length === 0) return null;
 
     const freqMap = new Map();
-    for (const char of text) {
-        freqMap.set(char, (freqMap.get(char) || 0) + 1);
+    for (const byte of bytes) {
+        freqMap.set(byte, (freqMap.get(byte) || 0) + 1);
     }
 
     const nodes = Array.from(freqMap.entries()).map(
-        ([char, freq]) => new HuffmanNode(char, freq)
+        ([byte, freq]) => new HuffmanNode(byte, freq)
     );
 
+    // building the tree
     while (nodes.length > 1) {
         nodes.sort((a, b) => a.freq - b.freq);
         
         const left = nodes.shift();
         const right = nodes.shift();
-        
-        const parent = new HuffmanNode('', left.freq + right.freq);
+
+        const parent = new HuffmanNode(null, left.freq + right.freq);
         parent.left = left;
         parent.right = right;
         
@@ -36,12 +37,12 @@ function buildHuffmanTree(text) {
     return nodes[0];
 }
 
-
 function generateCodes(node, code, codes) {
     if (!node) return;
 
-    if (!node.left && !node.right && node.char) {
-        codes.set(node.char, code || '0');
+    // Leaf node - valid byte
+    if (!node.left && !node.right && node.byte !== null) {
+        codes.set(node.byte, code || '0');
         return;
     }
 
@@ -49,46 +50,47 @@ function generateCodes(node, code, codes) {
     generateCodes(node.right, code + '1', codes);
 }
 
-
-function compressText(text) {
-    const tree = buildHuffmanTree(text);
+function compressBytes(bytes) {
+    const tree = buildHuffmanTree(bytes);
     const codes = new Map();
     
     if (tree) {
         generateCodes(tree, '', codes);
     }
 
+    // Compressing bytes using Huffman codes
     let compressed = '';
-    for (const char of text) {
-        compressed += codes.get(char) || '';
+    for (const byte of bytes) {
+        compressed += codes.get(byte) || '';
     }
 
-    return { compressed, tree: JSON.stringify(Array.from(codes.entries())), codes };
+    // serializing the codes table
+    const codesArray = Array.from(codes.entries());
+    
+    return { compressed, codes, codesArray };
 }
 
-
-function decompressText(compressed, codesJson) {
-    const codesArray = JSON.parse(codesJson);
+function decompressBytes(compressed, codesArray) {
+    // rebuilds the reverse map (code -> byte)
     const reverseCodes = new Map();
-    
-    for (const [char, code] of codesArray) {
-        reverseCodes.set(code, char);
+    for (const [byte, code] of codesArray) {
+        reverseCodes.set(code, byte);
     }
 
-    let result = '';
+    const result = [];
     let current = '';
     
+    // bit by bit decoding
     for (const bit of compressed) {
         current += bit;
         if (reverseCodes.has(current)) {
-            result += reverseCodes.get(current);
+            result.push(reverseCodes.get(current));
             current = '';
         }
     }
 
-    return result;
+    return new Uint8Array(result);
 }
-
 
 function binaryToBytes(binary) {
     const padding = (8 - (binary.length % 8)) % 8;
@@ -105,7 +107,6 @@ function binaryToBytes(binary) {
     return bytes;
 }
 
-
 function bytesToBinary(bytes) {
     const padding = bytes[0];
     let binary = '';
@@ -118,17 +119,20 @@ function bytesToBinary(bytes) {
 }
 
 
-
-
 async function compressFile() {
-    const text = await currentFile.text();
-    const originalSize = new Blob([text]).size;
+    const arrayBuffer = await currentFile.arrayBuffer();
+    const bytes = new Uint8Array(arrayBuffer);
+    const originalSize = bytes.length;
     
-    const { compressed, tree, codes } = compressText(text);
+    const { compressed, codes, codesArray } = compressBytes(bytes);
     const compressedBytes = binaryToBytes(compressed);
     
+    // codes table serialization
+    const codesJson = JSON.stringify(codesArray);
     const encoder = new TextEncoder();
-    const treeBytes = encoder.encode(tree);
+    const treeBytes = encoder.encode(codesJson);
+    
+
     const totalCompressed = new Uint8Array(4 + treeBytes.length + compressedBytes.length);
     
     const view = new DataView(totalCompressed.buffer);
@@ -153,30 +157,34 @@ async function compressFile() {
     displayCodes(codes);
 }
 
-
 async function decompressFile() {
     const arrayBuffer = await currentFile.arrayBuffer();
     const data = new Uint8Array(arrayBuffer);
     
+    // extracts the size of the codes table
     const view = new DataView(data.buffer);
     const treeSize = view.getUint32(0);
     
+    // extracts the codes table
     const treeBytes = data.slice(4, 4 + treeSize);
     const compressedBytes = data.slice(4 + treeSize);
     
     const decoder = new TextDecoder();
-    const tree = decoder.decode(treeBytes);
+    const codesJson = decoder.decode(treeBytes);
+    const codesArray = JSON.parse(codesJson);
+    
+    // converts compressed bytes to binary string
     const compressed = bytesToBinary(compressedBytes);
     
-    const decompressed = decompressText(compressed, tree);
+    // decompresses the data using the codes table
+    const decompressed = decompressBytes(compressed, codesArray);
     
-    const encoder = new TextEncoder();
-    resultData = encoder.encode(decompressed);
+    resultData = decompressed;
     resultFilename = currentFile.name.replace('.huff', '');
     
     displayStats({
         compressedSize: data.length,
-        decompressedSize: new Blob([decompressed]).size,
-        chars: decompressed.length
+        decompressedSize: decompressed.length,
+        bytes: decompressed.length
     });
 }
