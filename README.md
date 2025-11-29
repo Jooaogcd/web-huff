@@ -1,6 +1,6 @@
 # Web Huff
 
-🗜️ An interactive web application for text compression and decompression using the Huffman Algorithm.
+🗜️ An interactive web application for file compression and decompression using the Huffman Algorithm.
 
 [![Netlify Status](https://img.shields.io/badge/Netlify-Deployed-00C7B7?style=flat&logo=netlify)](https://web-huff.netlify.app/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
