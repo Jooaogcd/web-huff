@@ -5,10 +5,7 @@
 [![Netlify Status](https://img.shields.io/badge/Netlify-Deployed-00C7B7?style=flat&logo=netlify)](https://web-huff.netlify.app/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-## 🔗 Links
-
 - **Live Application:** [https://web-huff.netlify.app/](https://web-huff.netlify.app/)
-- **Repository:** [https://github.com/Jooaogcd/web-huff](https://github.com/Jooaogcd/web-huff)
 
 ## 📖 About the Project
 
