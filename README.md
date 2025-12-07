@@ -166,7 +166,7 @@ This project is under the MIT License. See the [LICENSE](LICENSE) file for more 
 
 ## 👤 Author
 
-**João Cuzzuol Dias**
+**@Jooaogcd** - [GitHub](https://github.com/Jooaogcd)
 
 
 ## ⭐ Give It a Star!
